@@ -1,0 +1,46 @@
+version: '2'
+        # use existing mysql db, shd not set username/passwd again
+        #    - ./nginx-wp2.conf:/etc/nginx/conf.d/wp2.conf
+        #            - 8080:80
+services:
+   nginx: 
+        container_name: myngx2
+        image: nginx:1.10
+        links:
+            - wp:fpm
+        volumes: 
+            - ./nginx-wp2.conf:/etc/nginx/conf.d/default.conf
+            - ./ng_pub.crt:/etc/nginx/ssl/ng_pub.crt
+            - ./ng_priv.key:/etc/nginx/ssl/ng_priv.key
+            - ./static:/var/www/static
+        ports:
+            - 443:443
+
+        volumes_from: 
+            - wp
+
+   db:
+        container_name: mydb2
+        image: mysql:5.6
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+            - ./my.cnf:/etc/mysql/conf.d/my.cnf  
+#environment:
+#  MYSQL_ROOT_PASSWORD: myroot
+#  MYSQL_DATABASE: wpdb1 
+#  MYSQL_USER: wp_user0
+#  MYSQL_PASSWORD: wp_pass0
+
+   wp:
+        container_name: mywp2
+        image: wordpress:4-php5.6-fpm
+        volumes: 
+           - ./data/wordpress:/var/www/html
+        links:
+           - db
+        environment:
+                WORDPRESS_DB_HOST: db:3306
+                WORDPRESS_DB_NAME: wpdb1
+                WORDPRESS_DB_USER: wp_user0
+                WORDPRESS_DB_PASSWORD: wp_pass0
+

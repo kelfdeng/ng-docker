@@ -1,0 +1,39 @@
+version: '2'
+services:
+  flask:
+    container_name: myflask
+    image: 3hdeng/flask:2.7
+    volumes: 
+      - .:/mnt/work   
+    working_dir:  /mnt/work
+    expose:
+      - "9090"      
+    command: uwsgi --ini /mnt/work/uwsgi.ini
+    #uwsgi --http :9090 --wsgi-file foobar.py
+
+  nginx: 
+    container_name: myngx
+    image: nginx:1.10
+    links:
+      - flask
+    volumes: 
+      - ./ng_https.conf:/etc/nginx/conf.d/default.conf
+      - ./ng_pub.crt:/etc/nginx/ssl/ng_pub.crt
+      - ./ng_priv.key:/etc/nginx/ssl/ng_priv.key
+      - ./static:/var/www/static
+    ports:
+      - 8080:80
+      - 443:443  
+#    volumes_from: 
+#      - wp
+
+
+#     - ./data/wordpress:/var/www/html
+#    links:
+#      - db
+#    environment:
+#      WORDPRESS_DB_HOST: db:3306
+#      WORDPRESS_DB_NAME: wpdb1
+#      WORDPRESS_DB_USER: wp_user0
+#      WORDPRESS_DB_PASSWORD: wp_pass0
+#
